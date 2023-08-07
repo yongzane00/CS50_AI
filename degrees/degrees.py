@@ -56,6 +56,7 @@ def main():
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
     directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    # directory = r"C:\Users\YongZane\Desktop\LearnPython\CS50\degrees\small"
 
     # Load data from files into memory
     print("Loading data...")
@@ -91,9 +92,57 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
+    # print(source) # Tom Cruise
+    # print(target) # Emma Watson
+
+    # Keep track of the number of explored paths
+    num_explored = 0
+
+    # Initialize frontier to the starting position
+    start = Node(state=source, parent=None, action=None)
+    frontier = StackFrontier()
+    frontier.add(start)
+
+    # Empty explore set
+    explored = set()
+
+    while True:
+        # No frontier means no node is connected to the current node
+        if frontier.empty():
+            raise Exception("No solution")
+        
+        # Whatever frontier method you using you will initialize the remove function (FIFO or FILO)
+        node = frontier.remove()
+        num_explored += 1
+        # print(f"Exploring {node.state}")
+        explored.add(node.state)
+        neighbors = neighbors_for_person(node.state)
+        # print(f"{node.state}'s neighbors: {neighbors}")
+
+
+
+        for movies, actors in neighbors:
+            if not frontier.contains_state(actors) and actors not in explored:
+                child = Node(state=actors, parent=node, action=movies)
+                frontier.add(child)
+                # If the frontier looking is the target goal, then you have reached the goal
+                if child.state == target:
+                    path = []
+                    node = child
+
+                    # Track the parent nodes to get the full path
+                    while node.parent is not None:
+                        path.append((node.action, node.state))
+                        node = node.parent
+                    
+                    path.reverse()
+                    # print(f"This is the path{path}")
+                    return path
+                
+                frontier.add(child)
 
     # TODO
-    raise NotImplementedError
+    # raise NotImplementedError
 
 
 def person_id_for_name(name):
