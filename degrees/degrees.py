@@ -136,7 +136,6 @@ def shortest_path(source, target):
                         node = node.parent
                     
                     path.reverse()
-                    # print(f"This is the path{path}")
                     return path
                 
                 frontier.add(child)
