@@ -8,7 +8,7 @@ X = "X"
 O = "O"
 EMPTY = None
 
-# This is main branch
+# This is edited codes
 def initial_state():
     """
     Returns starting state of the board.
