@@ -8,7 +8,7 @@ X = "X"
 O = "O"
 EMPTY = None
 
-# This is edited codes
+# This is 8Aug
 def initial_state():
     """
     Returns starting state of the board.
