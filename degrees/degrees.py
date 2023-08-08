@@ -100,7 +100,7 @@ def shortest_path(source, target):
 
     # Initialize frontier to the starting position
     start = Node(state=source, parent=None, action=None)
-    frontier = StackFrontier()
+    frontier = QueueFrontier()
     frontier.add(start)
 
     # Empty explore set
@@ -119,12 +119,11 @@ def shortest_path(source, target):
         neighbors = neighbors_for_person(node.state)
         # print(f"{node.state}'s neighbors: {neighbors}")
 
-
-
         for movies, actors in neighbors:
             if not frontier.contains_state(actors) and actors not in explored:
                 child = Node(state=actors, parent=node, action=movies)
                 frontier.add(child)
+
                 # If the frontier looking is the target goal, then you have reached the goal
                 if child.state == target:
                     path = []
