@@ -3,6 +3,7 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
 
 X = "X"
 O = "O"
@@ -35,8 +36,6 @@ def player(board):
         elif count_x == count_o + 1:
             return O    # O's turn
 
-    # Not sure if i need to put any return here
-
     # raise NotImplementedError
 
 
@@ -45,15 +44,15 @@ def actions(board):
     Returns set of all possible actions (i, j) available on the board.
     """
 
-    none_positions = []
+    none_positions = set()
     if not terminal(board):
         # Find positions of all occurrences of 'None'
         for row in range(len(board)):
             for col in range(len(board[row])):
-                if board[row][col] == 'None':
-                    none_positions.append((row, col))
+                if board[row][col] == EMPTY:
+                    none_positions.add((row, col))
 
-    return none_positions   # This will return all tuple (i,j) which are equal to None
+    return none_positions   # This will return all tuple (i,j) which represent all the possible actions
 
     # raise NotImplementedError
 
@@ -62,61 +61,63 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+
+    # Create new board, without modifying the original board received as input
+    result = copy.deepcopy(board)
+    result[action[0]][action[1]] = player(board)
+    return result
+
+    # raise NotImplementedError
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    # Check if all elements in a row, column, or diagonal have the same symbol ('X' or 'O')
-    def check_winner(elements):
-        return all(element == elements[0] for element in elements)
+    # Check rows
+    for row in board:
+        if all(cell == X for cell in row):
+            return X
+        elif all(cell == O for cell in row):
+            return O
 
-    # Check for a winning pattern (row, column, or diagonal)
-    def check_for_winner():
-        for i in range(len(board)):
-            row = board[i]
-            column = [board[j][i] for j in range(len(board))]
-            main_diagonal = [board[j][j] for j in range(len(board))]
-            secondary_diagonal = [board[j][len(board)-1-j] for j in range(len(board))]
+    # Check columns
+    for col in range(len(board[0])):
+        if all(board[row][col] == X for row in range(len(board))):
+            return X
+        elif all(board[row][col] == O for row in range(len(board))):
+            return O
 
-            if check_winner(row):
-                return row[0]
-            if check_winner(column):
-                return column[0]
-            if check_winner(main_diagonal):
-                return main_diagonal[0]
-            if check_winner(secondary_diagonal):
-                return secondary_diagonal[0]
-        return None
-    
-    winner_found = check_for_winner()
+    # Check diagonals
+    if all(board[i][i] == X for i in range(len(board))):
+        return X
+    if all(board[i][len(board) - i - 1] == X for i in range(len(board))):
+        return X
+    if all(board[i][i] == O for i in range(len(board))):
+        return O
+    if all(board[i][len(board) - i - 1] == O for i in range(len(board))):
+        return O
 
-    if winner_found:
-        return winner_found     # This will return either X or O
-    
-    return None
+    return None  # No winner
 
 
 def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    # print(board) = [[None, None, None], [None, None, None], [None, None, None]]
-    # print(len(board)) = 3
-    # print(type(board)) = <class 'list'>
-
-    # Check if there's no 'None' in the board or if there's a winner
+    # Define a function to check if the game is over
     def game_over(board):
-        none_positions = any(cell == 'None' for row in board for cell in row)
-        winner_found = winner(board)
-        return not none_positions or winner_found is not None
-    
+        # Check for a winning pattern or a full board
+        if winner(board) is not None:
+            return True
+        return all(cell != EMPTY for row in board for cell in row)
+
+    # Check if the game is over
     if game_over(board):
         return True
-        
-    return False
+    else:
+        return False
+    
 
     # raise NotImplementedError
 
@@ -126,18 +127,15 @@ def utility(board):
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
     # Determine the game result
-    def get_game_result(board):
+    if terminal(board):
         winner_found = winner(board)
-        if winner_found == 'X':
+        if winner_found == X:
             return 1
-        elif winner_found == 'O':
+        elif winner_found == O:
             return -1
         else:
             return 0
 
-    # Get the game result
-    utility_score = get_game_result(board)
-    return utility_score
     # raise NotImplementedError
 
 
@@ -145,4 +143,48 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+    else:
+        if player(board) == X:
+            value, move = max_value(board)
+            return move
+        else:
+            value, move = min_value(board)
+            return move
+
+
+def max_value(board):
+    if terminal(board):
+        return utility(board), None
+
+    v = float('-inf')
+    move = None
+    for action in actions(board):
+        # v = max(v, min_value(result(board, action)))
+        aux, act = min_value(result(board, action))
+        if aux > v:
+            v = aux
+            move = action
+            if v == 1:
+                return v, move
+
+    return v, move
+
+
+def min_value(board):
+    if terminal(board):
+        return utility(board), None
+
+    v = float('inf')
+    move = None
+    for action in actions(board):
+        # v = max(v, min_value(result(board, action)))
+        aux, act = max_value(result(board, action))
+        if aux < v:
+            v = aux
+            move = action
+            if v == -1:
+                return v, move
+
+    return v, move
